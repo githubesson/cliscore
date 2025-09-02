@@ -111,6 +111,7 @@ cliscore search -save -operator LOGS test@example.com
 - `config`: Manage configuration
 - `machineinfo`: Get machine information
 - `download`: Download files or data
+- `credits`: Get amount of credits assigned to api key
 
 ## Features
 
