@@ -7,16 +7,16 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	
+
 	"cliscore/internal/spinner"
 )
 
 type Config struct {
-	BaseURL         string `json:"baseURL"`
-	APIKey          string `json:"apiKey"`
-	ResultsDir      string `json:"resultsDir"`
-	SaveResults     bool   `json:"saveResults"`
-	SpinnerStyle    string `json:"spinnerStyle"`
+	BaseURL      string `json:"baseURL"`
+	APIKey       string `json:"apiKey"`
+	ResultsDir   string `json:"resultsDir"`
+	SaveResults  bool   `json:"saveResults"`
+	SpinnerStyle string `json:"spinnerStyle"`
 }
 
 func Load() *Config {
@@ -101,7 +101,7 @@ func SaveFullWithSpinner(baseURL, apiKey, resultsDir string, saveResults bool, s
 	}
 
 	configDir := filepath.Join(homeDir, ".keyscore-cli")
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err = os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config directory: %v", err)
 	}
 
@@ -139,7 +139,7 @@ func ConfigFileExists() bool {
 
 func SaveResults(data interface{}, command string, terms []string, types []string) error {
 	cfg := Load()
-	
+
 	if !cfg.SaveResults {
 		return nil
 	}
@@ -151,16 +151,16 @@ func SaveResults(data interface{}, command string, terms []string, types []strin
 	timestamp := time.Now().Format("20060102-150405")
 	safeTerms := makeSafeFilename(strings.Join(terms, "_"))
 	safeTypes := makeSafeFilename(strings.Join(types, "_"))
-	
+
 	filename := fmt.Sprintf("%s_%s_%s_%s.json", command, safeTerms, safeTypes, timestamp)
 	filePath := filepath.Join(cfg.ResultsDir, filename)
 
 	resultData := map[string]interface{}{
-		"timestamp":   time.Now().Format(time.RFC3339),
-		"command":     command,
-		"terms":       terms,
-		"types":       types,
-		"results":     data,
+		"timestamp": time.Now().Format(time.RFC3339),
+		"command":   command,
+		"terms":     terms,
+		"types":     types,
+		"results":   data,
 	}
 
 	jsonData, err := json.MarshalIndent(resultData, "", "  ")
@@ -177,11 +177,11 @@ func SaveResults(data interface{}, command string, terms []string, types []strin
 
 func GetResultsFilePath(command string, terms []string, types []string) string {
 	cfg := Load()
-	
+
 	timestamp := time.Now().Format("20060102-150405")
 	safeTerms := makeSafeFilename(strings.Join(terms, "_"))
 	safeTypes := makeSafeFilename(strings.Join(types, "_"))
-	
+
 	filename := fmt.Sprintf("%s_%s_%s_%s.json", command, safeTerms, safeTypes, timestamp)
 	return filepath.Join(cfg.ResultsDir, filename)
 }
@@ -197,7 +197,7 @@ func makeSafeFilename(s string) string {
 
 func CreateSpinner(message string) *spinner.Spinner {
 	cfg := Load()
-	
+
 	switch cfg.SpinnerStyle {
 	case "dots":
 		return spinner.WithDots(message)
