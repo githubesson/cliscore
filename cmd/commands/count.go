@@ -126,14 +126,14 @@ func (c *CountCommand) Execute(args []string) error {
 	}
 
 	if !quiet {
-		fmt.Printf("Count Results: %d\n", response.TotalCount)
+		fmt.Printf("Count Results: %s\n", formatNumber(response.TotalCount))
 		if response.Took > 0 {
 			fmt.Printf("Time taken: %dms\n", response.Took)
 		}
 		if len(response.Counts) > 0 {
 			fmt.Printf("Detailed counts:\n")
 			for key, value := range response.Counts {
-				fmt.Printf("  %s: %v\n", key, value)
+				fmt.Printf("  %s: %s\n", key, formatNumber(value))
 			}
 		}
 	} else {
