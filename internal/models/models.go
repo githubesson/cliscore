@@ -24,6 +24,12 @@ type CountResponse struct {
 	Count int64 `json:"count"`
 }
 
+type DetailedCountResponse struct {
+	Counts     map[string]interface{} `json:"counts"`
+	TotalCount int64                  `json:"total_count"`
+	Took       int64                  `json:"took"`
+}
+
 type ValidationRequest struct {
 	APIKey string `json:"apiKey"`
 }

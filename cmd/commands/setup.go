@@ -87,8 +87,15 @@ func (c *SetupCommand) Execute(args []string) error {
 	fmt.Println("3. arrows (rotating arrows)")
 	fmt.Println("4. bounce (bouncing dots)")
 	fmt.Println("5. simple (progressive dots)")
-	fmt.Println("6. none (no spinner)")
-	fmt.Printf("Select spinner style (1-6, default: %s): ", cfg.SpinnerStyle)
+	fmt.Println("6. emoji (⚡🔄⏳)")
+	fmt.Println("7. planet (🌍🌎🌏)")
+	fmt.Println("8. clock (🕐🕑🕒)")
+	fmt.Println("9. pulse (▁▂▃▄▅▆▇█)")
+	fmt.Println("10. braille (⠋⠙⠚⠒)")
+	fmt.Println("11. matrix (ｱｲｳｴｵ)")
+	fmt.Println("12. text ([=   ])")
+	fmt.Println("13. none (no spinner)")
+	fmt.Printf("Select spinner style (1-13, default: %s): ", cfg.SpinnerStyle)
 	
 	var styleResponse string
 	fmt.Scanln(&styleResponse)
@@ -107,6 +114,20 @@ func (c *SetupCommand) Execute(args []string) error {
 		case "5":
 			spinnerStyle = "simple"
 		case "6":
+			spinnerStyle = "emoji"
+		case "7":
+			spinnerStyle = "planet"
+		case "8":
+			spinnerStyle = "clock"
+		case "9":
+			spinnerStyle = "pulse"
+		case "10":
+			spinnerStyle = "braille"
+		case "11":
+			spinnerStyle = "matrix"
+		case "12":
+			spinnerStyle = "text"
+		case "13":
 			spinnerStyle = "none"
 		default:
 			fmt.Printf("Invalid choice, using default: %s\n", cfg.SpinnerStyle)

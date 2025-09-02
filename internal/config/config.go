@@ -207,6 +207,20 @@ func CreateSpinner(message string) *spinner.Spinner {
 		return spinner.WithBounce(message)
 	case "simple":
 		return spinner.WithSimple(message)
+	case "emoji":
+		return spinner.WithEmoji(message)
+	case "planet":
+		return spinner.WithPlanet(message)
+	case "clock":
+		return spinner.WithClock(message)
+	case "pulse":
+		return spinner.WithPulse(message)
+	case "braille":
+		return spinner.WithBraille(message)
+	case "matrix":
+		return spinner.WithMatrix(message)
+	case "text":
+		return spinner.WithText(message)
 	case "none":
 		return nil
 	default:

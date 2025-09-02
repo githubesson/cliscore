@@ -126,15 +126,26 @@ func (c *CountCommand) Execute(args []string) error {
 	}
 
 	if !quiet {
-		fmt.Printf("Count Results: %d\n", response.Count)
+		fmt.Printf("Count Results: %d\n", response.TotalCount)
+		if response.Took > 0 {
+			fmt.Printf("Time taken: %dms\n", response.Took)
+		}
+		if len(response.Counts) > 0 {
+			fmt.Printf("Detailed counts:\n")
+			for key, value := range response.Counts {
+				fmt.Printf("  %s: %v\n", key, value)
+			}
+		}
 	} else {
 		// In quiet mode, just print the count
-		fmt.Printf("%d\n", response.Count)
+		fmt.Printf("%d\n", response.TotalCount)
 	}
 
 	// Save results if enabled
 	countResult := map[string]interface{}{
-		"count": response.Count,
+		"total_count": response.TotalCount,
+		"took":        response.Took,
+		"counts":      response.Counts,
 	}
 	if err := config.SaveResults(countResult, "count", terms, types); err != nil {
 		if !quiet {

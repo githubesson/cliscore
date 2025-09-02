@@ -17,5 +17,6 @@ func GetCommands() []Command {
 		&MachineInfoCommand{},
 		&DownloadCommand{},
 		&CreditsCommand{},
+		&SpinnerCommand{},
 	}
 }

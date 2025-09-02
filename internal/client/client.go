@@ -25,8 +25,8 @@ func (c *APIClient) Search(req *models.SearchRequest, apiKey string) (*models.Se
 	return makeRequest[models.SearchResponse]("POST", "/search", req, apiKey)
 }
 
-func (c *APIClient) Count(req *models.CountRequest, apiKey string) (*models.CountResponse, error) {
-	return makeRequest[models.CountResponse]("POST", "/count", req, apiKey)
+func (c *APIClient) Count(req *models.CountRequest, apiKey string) (*models.DetailedCountResponse, error) {
+	return makeRequest[models.DetailedCountResponse]("POST", "/count/detailed", req, apiKey)
 }
 
 func (c *APIClient) ValidateAPIKey(apiKey string) error {

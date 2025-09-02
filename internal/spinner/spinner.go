@@ -103,6 +103,55 @@ func WithSimple(message string) *Spinner {
 	return s
 }
 
+func WithEmoji(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"⚡", "🔄", "⏳", "🔄", "⚡"})
+	s.SetDelay(150 * time.Millisecond)
+	return s
+}
+
+func WithPlanet(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"🌍", "🌎", "🌏"})
+	s.SetDelay(200 * time.Millisecond)
+	return s
+}
+
+func WithClock(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛"})
+	s.SetDelay(100 * time.Millisecond)
+	return s
+}
+
+func WithPulse(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▇", "▆", "▅", "▄", "▃", "▂", "▁"})
+	s.SetDelay(80 * time.Millisecond)
+	return s
+}
+
+func WithBraille(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"⠋", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒", "⠲", "⠴", "⠦", "⠖", "⠒", "⠐", "⠐", "⠒", "⠓", "⠋"})
+	s.SetDelay(80 * time.Millisecond)
+	return s
+}
+
+func WithMatrix(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"ｱ", "ｲ", "ｳ", "ｴ", "ｵ", "ｶ", "ｷ", "ｸ", "ｹ", "ｺ", "ｻ", "ｼ", "ｽ", "ｾ", "ｿ"})
+	s.SetDelay(70 * time.Millisecond)
+	return s
+}
+
+func WithText(message string) *Spinner {
+	s := New(message)
+	s.SetChars([]string{"[    ]", "[=   ]", "[==  ]", "[=== ]", "[====]", "[ ===]", "[  ==]", "[   =]"})
+	s.SetDelay(120 * time.Millisecond)
+	return s
+}
+
 type ProgressBar struct {
 	message    string
 	total      int
