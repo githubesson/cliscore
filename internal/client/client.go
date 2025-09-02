@@ -179,6 +179,13 @@ func (c *APIClient) DownloadFile(uuid, filePath, apiKey string, outputPath strin
 	return nil
 }
 
+func (c *APIClient) GetCredits(apiKey string) (*models.CreditsResponse, error) {
+	req := &models.ApiKeyValidation{
+		ApiKey: apiKey,
+	}
+	return makeRequest[models.CreditsResponse]("POST", "/credits", req, "")
+}
+
 func makeRequest[T any](method, endpoint string, data interface{}, apiKey string) (*T, error) {
 	cfg := config.Load()
 	url := cfg.BaseURL + endpoint

@@ -122,3 +122,12 @@ type DownloadResponse struct {
 	FileSize int64  `json:"fileSize,omitempty"`
 	FileName string `json:"fileName,omitempty"`
 }
+
+type CreditsResponse struct {
+	Credits int64  `json:"credits"`
+	Message string `json:"message,omitempty"`
+}
+
+type ApiKeyValidation struct {
+	ApiKey string `json:"apiKey"`
+}
