@@ -1,11 +1,17 @@
 package models
 
 type SearchRequest struct {
-	Terms    []string `json:"terms"`
-	Types    []string `json:"types"`
-	Wildcard bool     `json:"wildcard"`
-	Source   string   `json:"source"`
-	Operator *string  `json:"operator,omitempty"`
+	Terms     []string `json:"terms"`
+	Types     []string `json:"types"`
+	Wildcard  bool     `json:"wildcard"`
+	Source    string   `json:"source"`
+	Operator  *string  `json:"operator,omitempty"`
+}
+
+type SearchPaginationParams struct {
+	Page     *int    `json:"-"` // Will be sent as query parameter
+	Pages    []int   `json:"-"` // Will be sent as query parameter
+	PageSize *int    `json:"-"` // Will be sent as query parameter
 }
 
 type CountRequest struct {
@@ -18,6 +24,9 @@ type CountRequest struct {
 
 type SearchResponse struct {
 	Results map[string]interface{} `json:"results"`
+	Pages   map[int]map[string]interface{} `json:"pages,omitempty"`
+	Size    int64  `json:"size,omitempty"`
+	Took    int64  `json:"took,omitempty"`
 }
 
 type CountResponse struct {

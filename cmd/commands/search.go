@@ -20,7 +20,7 @@ func (c *SearchCommand) Name() string {
 }
 
 func (c *SearchCommand) Description() string {
-	return "Search for terms across different data types"
+	return "Search for terms across different data types (with pagination support)"
 }
 
 func (c *SearchCommand) Execute(args []string) error {
@@ -36,6 +36,9 @@ func (c *SearchCommand) Execute(args []string) error {
 		showSpinner  bool
 		quiet        bool
 		operator     string
+		page         int
+		pages        string
+		pageSize     int
 	)
 
 	flagSet := flag.NewFlagSet("search", flag.ExitOnError)
@@ -48,6 +51,9 @@ func (c *SearchCommand) Execute(args []string) error {
 	flagSet.BoolVar(&showSpinner, "spinner", true, "Show loading spinner")
 	flagSet.BoolVar(&quiet, "quiet", false, "Quiet mode (no spinner)")
 	flagSet.StringVar(&operator, "operator", "", "Search operator (AND, LOGS)")
+	flagSet.IntVar(&page, "page", 0, "Specific page number to retrieve (1-10)")
+	flagSet.StringVar(&pages, "pages", "", "Pages to retrieve (e.g., '1,2,3' or '1-5')")
+	flagSet.IntVar(&pageSize, "page-size", 0, "Number of results per page (max: 10000)")
 
 	if err := flagSet.Parse(args); err != nil {
 		return err
@@ -102,6 +108,33 @@ func (c *SearchCommand) Execute(args []string) error {
 		req.Operator = &operator
 	}
 
+	// Parse pagination parameters
+	var pagination *models.SearchPaginationParams
+	if page > 0 || pages != "" || pageSize > 0 {
+		pagination = &models.SearchPaginationParams{}
+		
+		if page > 0 {
+			if page > 10 {
+				page = 10
+			}
+			pagination.Page = &page
+		}
+		
+		if pages != "" {
+			pageList := parsePages(pages)
+			if len(pageList) > 0 {
+				pagination.Pages = pageList
+			}
+		}
+		
+		if pageSize > 0 {
+			if pageSize > 10000 {
+				pageSize = 10000
+			}
+			pagination.PageSize = &pageSize
+		}
+	}
+
 	var spin *spinner.Spinner
 	if showSpinner && !quiet {
 		searchMsg := fmt.Sprintf("Searching for %s in %s...", strings.Join(terms, ", "), strings.Join(types, ", "))
@@ -111,7 +144,14 @@ func (c *SearchCommand) Execute(args []string) error {
 		}
 	}
 
-	response, err := apiClient.Search(req, cfg.APIKey)
+	var response *models.SearchResponse
+	var err error
+	
+	if pagination != nil {
+		response, err = apiClient.SearchWithPagination(req, pagination, cfg.APIKey)
+	} else {
+		response, err = apiClient.Search(req, cfg.APIKey)
+	}
 	
 	if spin != nil {
 		spin.Stop()
@@ -122,16 +162,47 @@ func (c *SearchCommand) Execute(args []string) error {
 		os.Exit(1)
 	}
 
-	resultCount := len(response.Results)
-	fmt.Printf("Found %d results\n", resultCount)
+	// Handle different response formats for paginated vs regular searches
+	var resultCount int
+	var resultsToSave interface{}
 
-	if !quiet && !cfg.SaveResults {
-		fmt.Printf("Search Results:\n")
-		PrettyPrint(response.Results)
+	if len(response.Pages) > 0 {
+		// Paginated response
+		resultCount = int(response.Size)
+		
+		if !quiet {
+			fmt.Printf("🔍 Search Results (Paginated)\n")
+			fmt.Printf("%s", formatPaginationInfo(response))
+			
+			// Display each page's results
+			for pageNum, pageResults := range response.Pages {
+				fmt.Printf("\n=== Page %d ===\n", pageNum)
+				PrettyPrint(pageResults)
+			}
+		} else {
+			// Quiet mode - just show total count
+			fmt.Printf("%d\n", response.Size)
+		}
+		
+		// For saving, include the full paginated response structure
+		resultsToSave = response
+	} else {
+		// Regular response
+		resultCount = len(response.Results)
+		resultsToSave = response.Results
+		
+		if !quiet {
+			fmt.Printf("Found %d results\n", resultCount)
+			fmt.Printf("Search Results:\n")
+			PrettyPrint(response.Results)
+		} else {
+			// Quiet mode - just show count
+			fmt.Printf("%d\n", resultCount)
+		}
 	}
 
 	if cfg.SaveResults {
-		if err := config.SaveResults(response.Results, "search", terms, types); err != nil {
+		if err := config.SaveResults(resultsToSave, "search", terms, types); err != nil {
 			if !quiet {
 				fmt.Printf("Warning: Failed to save results: %v\n", err)
 			}

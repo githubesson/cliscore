@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"cliscore/internal/config"
 	"cliscore/internal/models"
@@ -23,6 +24,64 @@ func New(cfg *config.Config) *APIClient {
 
 func (c *APIClient) Search(req *models.SearchRequest, apiKey string) (*models.SearchResponse, error) {
 	return makeRequest[models.SearchResponse]("POST", "/search", req, apiKey)
+}
+
+func (c *APIClient) SearchWithPagination(req *models.SearchRequest, pagination *models.SearchPaginationParams, apiKey string) (*models.SearchResponse, error) {
+	cfg := c.config
+	url := cfg.BaseURL + "/search"
+	
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling request: %v", err)
+	}
+	
+	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %v", err)
+	}
+	
+	httpReq.Header.Set("Content-Type", "application/json")
+	if apiKey != "" {
+		httpReq.Header.Set("Authorization", "Bearer "+apiKey)
+	}
+	
+	// Add query parameters for pagination
+	q := httpReq.URL.Query()
+	if pagination != nil {
+		if pagination.Page != nil {
+			q.Add("page", fmt.Sprintf("%d", *pagination.Page))
+		}
+		if len(pagination.Pages) > 0 {
+			pagesStr := make([]string, len(pagination.Pages))
+			for i, page := range pagination.Pages {
+				pagesStr[i] = fmt.Sprintf("%d", page)
+			}
+			q.Add("pages", strings.Join(pagesStr, ","))
+		}
+		if pagination.PageSize != nil {
+			q.Add("pagesize", fmt.Sprintf("%d", *pagination.PageSize))
+		}
+	}
+	httpReq.URL.RawQuery = q.Encode()
+	
+	client := &http.Client{}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %v", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
+	}
+	
+	var result models.SearchResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("error parsing response: %v", err)
+	}
+	
+	return &result, nil
 }
 
 func (c *APIClient) Count(req *models.CountRequest, apiKey string) (*models.DetailedCountResponse, error) {

@@ -231,6 +231,68 @@ func formatInt(n int64) string {
 	return string(result)
 }
 
+// parsePages parses a pages string into a slice of page numbers
+// Supports formats: "1,2,3", "1-5", "1,3,5-7"
+func parsePages(pagesStr string) []int {
+	var result []int
+	
+	parts := strings.Split(pagesStr, ",")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if strings.Contains(part, "-") {
+			// Handle range like "1-5"
+			rangeParts := strings.Split(part, "-")
+			if len(rangeParts) == 2 {
+				start, err1 := strconv.Atoi(strings.TrimSpace(rangeParts[0]))
+				end, err2 := strconv.Atoi(strings.TrimSpace(rangeParts[1]))
+				if err1 == nil && err2 == nil && start <= end {
+					for i := start; i <= end; i++ {
+						if i <= 10 { // Max page limit from backend
+							result = append(result, i)
+						}
+					}
+				}
+			}
+		} else {
+			// Handle single page number
+			if page, err := strconv.Atoi(part); err == nil && page <= 10 {
+				result = append(result, page)
+			}
+		}
+	}
+	
+	return result
+}
+
+// formatPaginationInfo formats pagination information for display
+func formatPaginationInfo(response *models.SearchResponse) string {
+	var info strings.Builder
+	
+	info.WriteString(fmt.Sprintf("Total results: %s\n", formatNumber(response.Size)))
+	info.WriteString(fmt.Sprintf("Pages retrieved: %d\n", len(response.Pages)))
+	
+	if response.Took > 0 {
+		info.WriteString(fmt.Sprintf("Time taken: %dms\n", response.Took))
+	}
+	
+	// Show which pages were retrieved
+	if len(response.Pages) > 0 {
+		pages := make([]int, 0, len(response.Pages))
+		for pageNum := range response.Pages {
+			pages = append(pages, pageNum)
+		}
+		sort.Ints(pages)
+		
+		pageStrs := make([]string, len(pages))
+		for i, page := range pages {
+			pageStrs[i] = fmt.Sprintf("%d", page)
+		}
+		info.WriteString(fmt.Sprintf("Pages: %s\n", strings.Join(pageStrs, ", ")))
+	}
+	
+	return info.String()
+}
+
 // Detector interface for type detection
 type Detector interface {
 	DetectTypes(terms []string) []string
